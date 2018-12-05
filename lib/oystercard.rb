@@ -12,7 +12,7 @@ class Oystercard
     @card = false
     @entry_station = nil
     @exit_station = nil
-    @journeys = {}
+    @journeys = []
   end
 
   def top_up(amount)
@@ -29,6 +29,7 @@ class Oystercard
     fail "Your balance is too low" if (@balance - MINIMUM_FARE) < 0
     @card = true
     @entry_station = entry_station
+    journey
   end
 
   def touch_out(exit_station)
@@ -36,6 +37,12 @@ class Oystercard
     @card == true ? deduct(MINIMUM_FARE) : @card
     @card = false
     @exit_station = exit_station
+    journey
+    @journeys << journey
+  end
+
+  def journey
+    journey = { entry_station: @entry_station, exit_station: @exit_station }
   end
 
   private
