@@ -3,16 +3,17 @@ require "oystercard"
 describe Oystercard do
 
   subject(:card) { Oystercard.new }
-  let(:entry_station) { double :entry_station }
-  let(:exit_station) { double :exit_station }
+  let(:entry_station) { double :station }
+  let(:exit_station) { double :station }
+  let(:journey){ {entry_station: entry_station, exit_station: exit_station} }
 
   it "it starts with a balance of zero" do
     expect(card.balance).to eq(0)
   end
 
-  it 'starts with an empty journey array' do
-    expect(card.journeys).to eq([])
-  end
+  # it 'starts with an empty journey array' do
+  #   expect(card.journeys).to eq([])
+  # end
 
   describe "#top_up" do
 
@@ -64,10 +65,17 @@ describe Oystercard do
 
     describe "#journey" do
       it 'records a completed journey' do
-        card.top_up(50)
+        card.top_up(Oystercard::MINIMUM_FARE)
         card.touch_in(entry_station)
         card.touch_out(exit_station)
-        expect(card.journey).to eq({entry_station: entry_station, exit_station: exit_station})
+        expect(card.journey).to eq(journey)
+      end
+
+      it 'stores a journey' do
+        card.top_up(Oystercard::MINIMUM_FARE)
+        subject.touch_in(entry_station)
+        subject.touch_out(exit_station)
+        expect(subject.journeys).to include journey
       end
     end
   end
