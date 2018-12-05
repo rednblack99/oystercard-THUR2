@@ -7,7 +7,8 @@ class Oystercard
   MAXIMUM_BALANCE = 90
   MINIMUM_FARE = 1
 
-  def initialize(entry_station = Station.new, exit_station = Station.new)
+  def initialize
+    # (entry_station = Station.new, exit_station = Station.new)
     @balance = 0
     @card = false
     @entry_station = nil
