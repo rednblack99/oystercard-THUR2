@@ -1,4 +1,4 @@
-class Station
+class EntryStation
 
   attr_reader :name, :zone
 

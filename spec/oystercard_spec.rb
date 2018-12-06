@@ -22,18 +22,10 @@ describe Oystercard do
 
   end
 
-  describe '#in_journey?' do
-
-    it "card set as nil if not in journey" do
-      expect(card.in_journey?).to eq(true).or be_falsey
-    end
-
-  end
-
   describe "#touch_in" do
 
     it "it won't touch in if balance is too low" do
-      expect{ card.touch_in(entry_station, zone) }.to raise_error "Your balance is too low"
+      expect{ card.touch_in }.to raise_error "Your balance is too low"
     end
 
   end
@@ -41,18 +33,16 @@ describe Oystercard do
   describe "#touch_out" do
 
     it 'charges minimum fare when touched out' do
-      card.top_up(Oystercard::MINIMUM_FARE)
-      card.touch_in(entry_station, zone)
-      expect{ card.touch_out(exit_station, zone) }.to change{ card.balance }.by -(Oystercard::MINIMUM_FARE)
+      card.top_up(Journey::MINIMUM_FARE)
+      card.touch_in
+      expect{ card.touch_out }.to change{ card.balance }.by -(Journey::MINIMUM_FARE)
     end
   end
 
   describe "#journey" do
 
     before(:each) do
-      allow(card).to receive(:top_up).and_return(Oystercard::MINIMUM_FARE)
-      # allow(card).to receive(:touch_in).and_return(entry_station, zone)
-      # allow(card).to receive(:touch_out).and_return(exit_station, zone)
+      allow(card).to receive(:top_up).and_return(Journey::MINIMUM_FARE)
     end
 
     it 'records a completed journey' do
@@ -62,9 +52,9 @@ describe Oystercard do
     it 'stores a journey' do
       journey_card = Oystercard.new
       journey_card.top_up(20)
-      journey_card.touch_in("entry_station", 1)
-      journey_card.touch_out("exit_station", 2)
-      expect(journey_card.journeys).to eq([[{:entry_station=>"entry_station", :zone=>1}, {:exit_station=>"exit_station", :zone=>2}]])
+      journey_card.touch_in
+      journey_card.touch_out
+      expect(journey_card.journey_history).to eq([[{:entry_station=>"Old Street", :zone=>1}, {:exit_station=>"Aldgate", :zone=>1}]])
     end
 
   end
