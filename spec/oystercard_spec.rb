@@ -5,78 +5,68 @@ describe Oystercard do
   subject(:card) { Oystercard.new }
   let(:entry_station) { double :station }
   let(:exit_station) { double :station }
-  let(:journey){ {entry_station: entry_station, exit_station: exit_station} }
-
-  it "it starts with a balance of zero" do
-    expect(card.balance).to eq(0)
-  end
-
-  # it 'starts with an empty journey array' do
-  #   expect(card.journeys).to eq([])
-  # end
+  let(:journey){ [{entry_station: entry_station, exit_station: exit_station}] }
+  let(:zone) { double :zone }
 
   describe "#top_up" do
 
-    it "it should be able to top up by a given amount" do
+    it "increases starting balance of 0 by a given amount" do
       expect{ card.top_up(5) }.to change{ card.balance }.by 5
     end
 
-    it "it should prevent user form having a balance higher than #{Oystercard::MAXIMUM_BALANCE}" do
+    it "it prevents user form having a balance higher than #{Oystercard::MAXIMUM_BALANCE}" do
       max_bal = Oystercard::MAXIMUM_BALANCE
       card.top_up(max_bal)
       expect { card.top_up(1) }.to raise_error "Balance has exceeded maximum balance of £#{max_bal}"
     end
 
-    describe '#in_journey?' do
-      it "should return nil or entry_station name" do
-        expect(card.in_journey?).to eq(true).or be_falsey
-      end
+  end
+
+  describe '#in_journey?' do
+
+    it "card set as nil if not in journey" do
+      expect(card.in_journey?).to eq(true).or be_falsey
     end
 
-    describe "#touch_in" do
-      it "it won't touch in if balance is too low" do
-        expect{ card.touch_in(entry_station) }.to raise_error "Your balance is too low"
-      end
+  end
 
-      # it "it records point of entry entry_station" do
-      #   card.top_up(Oystercard::MINIMUM_FARE)
-      #   expect(card.touch_in(entry_station)).to eq(entry_station)
-      # end
+  describe "#touch_in" do
 
+    it "it won't touch in if balance is too low" do
+      expect{ card.touch_in(entry_station, zone) }.to raise_error "Your balance is too low"
     end
 
-    describe "#touch_out" do
-      # it "it records touch out exit_station" do
-      #   card.top_up(Oystercard::MINIMUM_FARE)
-      #   card.touch_in(entry_station)
-      #   expect(card.touch_out(exit_station)).to be(exit_station)
-      # end
+  end
 
-      # it 'can touch out' do
-      #   expect(card.touch_out).to eq(false)
-      # end
+  describe "#touch_out" do
 
-      it 'charges minimum fare when touched out' do
-        card.top_up(Oystercard::MINIMUM_FARE)
-        card.touch_in(entry_station)
-        expect{ card.touch_out(exit_station) }.to change{ card.balance }.by -(Oystercard::MINIMUM_FARE)
-      end
-    end
-
-    describe "#journey" do
-      it 'records a completed journey' do
-        card.top_up(Oystercard::MINIMUM_FARE)
-        card.touch_in(entry_station)
-        card.touch_out(exit_station)
-        expect(card.journey).to eq(journey)
-      end
-
-      it 'stores a journey' do
-        card.top_up(Oystercard::MINIMUM_FARE)
-        subject.touch_in(entry_station)
-        subject.touch_out(exit_station)
-        expect(subject.journeys).to include journey
-      end
+    it 'charges minimum fare when touched out' do
+      card.top_up(Oystercard::MINIMUM_FARE)
+      card.touch_in(entry_station, zone)
+      expect{ card.touch_out(exit_station, zone) }.to change{ card.balance }.by -(Oystercard::MINIMUM_FARE)
     end
   end
+
+  describe "#journey" do
+
+    before(:each) do
+      allow(card).to receive(:top_up).and_return(Oystercard::MINIMUM_FARE)
+      # allow(card).to receive(:touch_in).and_return(entry_station, zone)
+      # allow(card).to receive(:touch_out).and_return(exit_station, zone)
+    end
+
+    it 'records a completed journey' do
+      expect(journey).to eq([entry_station: entry_station, exit_station: exit_station])
+    end
+
+    it 'stores a journey' do
+      journey_card = Oystercard.new
+      journey_card.top_up(20)
+      journey_card.touch_in("entry_station", 1)
+      journey_card.touch_out("exit_station", 2)
+      expect(journey_card.journeys).to eq([[{:entry_station=>"entry_station", :zone=>1}, {:exit_station=>"exit_station", :zone=>2}]])
+    end
+
+  end
+
 end
