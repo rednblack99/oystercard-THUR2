@@ -15,14 +15,14 @@ class Journey
     @in_transit == nil ? false : true
   end
 
-  def get_entry_station
-    station = EntryStation.new
+  def get_entry_station(entry_station, zone)
+    station = Station.new(entry_station, zone)
     @entry_station = station.info
-    @journey << @entry_station  
+    @journey << @entry_station
   end
 
-  def get_exit_station
-    station = ExitStation.new
+  def get_exit_station(exit_station, zone)
+    station = Station.new(exit_station, zone)
     @exit_station = station.info
     @journey << @exit_station
   end

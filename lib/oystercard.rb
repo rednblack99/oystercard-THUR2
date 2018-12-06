@@ -8,9 +8,10 @@ class Oystercard
   attr_accessor :in_transit, :journey_history
   MAXIMUM_BALANCE = 90
 
-  def initialize
+  def initialize(journey = Journey.new)
     @balance = 0
     @in_transit = false
+    @journey = journey
     @journey_history = []
   end
 
@@ -19,18 +20,17 @@ class Oystercard
     @balance = @balance + amount
   end
 
-  def touch_in
+  def touch_in(entry_station, zone)
     fail "Your balance is too low" if (@balance - Journey::MINIMUM_FARE) < 0
     fail "You've already touched in" if @in_transit
-    @journey = Journey.new
     @in_transit = true
-    @journey.get_entry_station
+    @journey.get_entry_station(entry_station, zone)
   end
 
-  def touch_out
+  def touch_out(exit_station, zone)
     fail "You're not touched in" if !@in_transit
     @in_transit = false
-    @journey.get_exit_station
+    @journey.get_exit_station(exit_station, zone)
     @balance -= @journey.fare
     @journey_history << @journey.save
   end
